@@ -1,0 +1,40 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Config files (may contain local paths)
+config/templates_config.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Revit
+*.rvt.bak
+*.rfa.bak
+*.0001
+*.0002
+*.0003
+*.0004
+
+# Logs
+*.log
+
+# Test files
+test/
+tests/
+*.test.py

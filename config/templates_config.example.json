@@ -1,0 +1,11 @@
+{
+    "templates": {
+        "wall": "C:/Revit Templates/RFA Conversion/Wall_Template.rvt",
+        "floor": "C:/Revit Templates/RFA Conversion/Floor_Template.rvt",
+        "ceiling": "C:/Revit Templates/RFA Conversion/Ceiling_Template.rvt",
+        "roof": "C:/Revit Templates/RFA Conversion/Roof_Template.rvt",
+        "standalone": "C:/Revit Templates/RFA Conversion/Empty_Template.rvt"
+    },
+    "last_export_folder": "C:/Export/IFC",
+    "last_rfa_folder": "C:/Revit Families"
+}
