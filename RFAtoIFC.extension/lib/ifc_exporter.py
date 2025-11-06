@@ -96,15 +96,13 @@ class IFCExporter:
             # Store IFC GUID in file
             ifc_options.StoreIFCGUID = True
 
-            # Tessellation - use standard quality
-            # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
-            # Quality is controlled by UseCoarseTessellation instead
+            # Tessellation quality - controlled by View's DetailLevel setting
+            # Note: In Revit 2024, tessellation properties (TessellationLevelOfDetail,
+            # UseCoarseTessellation) don't exist in IFCExportOptions API
+            # Quality is controlled by setting DetailLevel in 3D View before export
 
-            # Use active view settings
+            # Use active view settings - CRITICAL for using View's DetailLevel
             ifc_options.UseActiveViewGeometry = True
-
-            # Use coarse representations where appropriate
-            ifc_options.UseCoarseTessellation = False
 
             # Use family and type name for references
             ifc_options.UseFamilyAndTypeNameForReference = True
@@ -145,7 +143,7 @@ class IFCExporter:
             return (False, "", error_msg)
 
     def _get_3d_view_id(self):
-        """Get the first available 3D view ID.
+        """Get the first available 3D view ID and set its DetailLevel to Medium.
 
         Returns:
             ElementId of 3D view or ElementId.InvalidElementId
@@ -155,9 +153,14 @@ class IFCExporter:
             collector = FilteredElementCollector(self.document)
             views_3d = collector.OfClass(View3D).ToElements()
 
-            # Find first non-template 3D view
+            # Find first non-template 3D view and set detail level
             for view in views_3d:
                 if not view.IsTemplate:
+                    # Set detail level to Medium for balanced quality
+                    try:
+                        view.DetailLevel = ViewDetailLevel.Medium
+                    except:
+                        pass
                     return view.Id
 
             # If no regular 3D view found, return invalid ID
@@ -168,7 +171,7 @@ class IFCExporter:
             return ElementId.InvalidElementId
 
     def activate_3d_view(self):
-        """Activate a 3D view in the document.
+        """Activate a 3D view in the document with Medium detail level.
 
         Returns:
             View3D object or None if failed
@@ -179,6 +182,14 @@ class IFCExporter:
 
             for view in views_3d:
                 if not view.IsTemplate:
+                    # Set to Medium detail level for balanced quality
+                    try:
+                        with Transaction(self.document, "Set Detail Level") as t:
+                            t.Start()
+                            view.DetailLevel = ViewDetailLevel.Medium
+                            t.Commit()
+                    except:
+                        pass
                     return view
 
             return None

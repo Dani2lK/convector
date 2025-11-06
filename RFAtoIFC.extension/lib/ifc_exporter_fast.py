@@ -43,7 +43,7 @@ class FastIFCExporter:
 
             # Basic settings
             ifc_options.FileVersion = IFCVersion.IFC4
-            ifc_options.FilterViewId = self._get_3d_view_id()
+            ifc_options.FilterViewId = self._get_3d_view_id(quality)
             ifc_options.StoreIFCGUID = True
 
             # Quality-based settings
@@ -63,10 +63,9 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                # Tessellation - very coarse for speed
-                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
+                # Tessellation quality controlled by View's DetailLevel (set to Coarse for speed)
+                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
                 ifc_options.UseActiveViewGeometry = False
-                ifc_options.UseCoarseTessellation = True  # FAST!
                 ifc_options.UseFamilyAndTypeNameForReference = False
                 ifc_options.UseTypeNameOnlyForIfcType = True
                 ifc_options.UseVisibleRevitNameAsEntityName = True
@@ -88,10 +87,9 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                # Tessellation - balanced quality
-                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
+                # Tessellation quality controlled by View's DetailLevel (set to Medium)
+                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
                 ifc_options.UseActiveViewGeometry = True
-                ifc_options.UseCoarseTessellation = False
                 ifc_options.UseFamilyAndTypeNameForReference = True
                 ifc_options.UseTypeNameOnlyForIfcType = False
                 ifc_options.UseVisibleRevitNameAsEntityName = True
@@ -113,10 +111,9 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                # Tessellation - fine quality
-                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
+                # Tessellation quality controlled by View's DetailLevel (set to Fine)
+                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
                 ifc_options.UseActiveViewGeometry = True
-                ifc_options.UseCoarseTessellation = False
                 ifc_options.UseFamilyAndTypeNameForReference = True
                 ifc_options.UseTypeNameOnlyForIfcType = False
                 ifc_options.UseVisibleRevitNameAsEntityName = True
@@ -141,14 +138,31 @@ class FastIFCExporter:
             error_msg = "IFC Export Error: {}".format(str(e))
             return (False, "", error_msg)
 
-    def _get_3d_view_id(self):
-        """Get the first available 3D view ID."""
+    def _get_3d_view_id(self, quality='medium'):
+        """Get the first available 3D view ID and set DetailLevel based on quality.
+
+        Args:
+            quality: Export quality - 'fast', 'medium', 'high'
+        """
         try:
             collector = FilteredElementCollector(self.document)
             views_3d = collector.OfClass(View3D).ToElements()
 
+            # Map quality to DetailLevel
+            detail_level_map = {
+                'fast': ViewDetailLevel.Coarse,
+                'medium': ViewDetailLevel.Medium,
+                'high': ViewDetailLevel.Fine
+            }
+            detail_level = detail_level_map.get(quality, ViewDetailLevel.Medium)
+
             for view in views_3d:
                 if not view.IsTemplate:
+                    # Set detail level based on quality setting
+                    try:
+                        view.DetailLevel = detail_level
+                    except:
+                        pass
                     return view.Id
 
             return ElementId.InvalidElementId

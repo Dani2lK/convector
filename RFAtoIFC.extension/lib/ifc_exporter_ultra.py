@@ -56,18 +56,14 @@ class UltraQualityIFCExporter:
             # ============================================================
 
             # Tessellation - MAXIMUM quality
-            # Note: In Revit 2024, TessellationLevelOfDetail may not exist as property
-            # Use AddOption instead for better compatibility
-            # Level: 0.0 = finest, 1.0 = coarsest
-            # For ULTRA quality we want finest (close to 0.0)
-
-            # Use FINE tessellation (not coarse)
-            ifc_options.UseCoarseTessellation = False  # Четкая триангуляция!
+            # Note: In Revit 2024, tessellation quality is controlled by View DetailLevel
+            # Not through IFCExportOptions properties (those don't exist)
+            # We set DetailLevel.Fine for 3D view before export for best quality
 
             # Export as solid model representation (best for Blender)
             ifc_options.ExportSolidModelRep = True  # Твердотельная геометрия
 
-            # Use active view geometry for accurate representation
+            # Use active view geometry - CRITICAL for using View's DetailLevel setting
             ifc_options.UseActiveViewGeometry = True
 
             # ============================================================
@@ -322,8 +318,7 @@ class BalancedQualityIFCExporter:
             # Core settings
             ifc_options.FileVersion = IFCVersion.IFC4
 
-            # Balanced quality - use coarse tessellation=False for good detail
-            ifc_options.UseCoarseTessellation = False
+            # Balanced quality - quality controlled by View's DetailLevel
             ifc_options.ExportSolidModelRep = True
             ifc_options.UseActiveViewGeometry = True
 
