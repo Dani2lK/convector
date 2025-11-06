@@ -23,7 +23,7 @@ if lib_path not in sys.path:
 
 from config_manager import ConfigManager
 from family_analyzer import FamilyAnalyzer
-from ifc_exporter import IFCExporter
+from ifc_exporter_ultra import UltraQualityIFCExporter
 from ui_helpers import (
     FileSelectionHelper, TemplateConfigDialog,
     RevitActivitySimulator, AutoDismissFailureHandler
@@ -55,7 +55,8 @@ class RFAtoIFCConverter:
         """Main entry point for conversion process."""
         try:
             print("\n" + "="*60)
-            print("RFA to IFC4 Converter")
+            print("RFA to IFC4 Converter - ULTRA QUALITY")
+            print("Максимальное качество для Blender")
             print("="*60 + "\n")
 
             # Check if templates are configured
@@ -123,7 +124,7 @@ class RFAtoIFCConverter:
             self.config_manager.set_last_export_folder(export_folder)
 
             # Create IFC4 subfolder
-            ifc4_folder = os.path.join(export_folder, IFCExporter.get_ifc4_folder_name())
+            ifc4_folder = os.path.join(export_folder, UltraQualityIFCExporter.get_ifc4_folder_name())
             if not os.path.exists(ifc4_folder):
                 os.makedirs(ifc4_folder)
 
@@ -268,16 +269,16 @@ class RFAtoIFCConverter:
 
             # Get 3D view and activate it
             print("  Активация 3D вида...")
-            exporter = IFCExporter(project_doc)
+            exporter = UltraQualityIFCExporter(project_doc)
             view_3d = exporter.activate_3d_view()
 
             if not view_3d:
                 print("  Предупреждение: 3D вид не найден, но продолжаем экспорт...")
 
-            # Export to IFC4
-            print("  Экспорт в IFC4...")
+            # Export to IFC4 with ULTRA quality
+            print("  Экспорт в IFC4 (максимальное качество)...")
             file_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
-            success, output_path, error = exporter.export_to_ifc4(output_folder, file_name)
+            success, output_path, error = exporter.export_to_ifc4_ultra(output_folder, file_name)
 
             if success:
                 print("  ✓ Успешно экспортировано: {}".format(output_path))
