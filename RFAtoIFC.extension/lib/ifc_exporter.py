@@ -96,8 +96,9 @@ class IFCExporter:
             # Store IFC GUID in file
             ifc_options.StoreIFCGUID = True
 
-            # Tessellation level of detail
-            ifc_options.TessellationLevelOfDetail = 0.5  # Medium detail
+            # Tessellation - use standard quality
+            # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
+            # Quality is controlled by UseCoarseTessellation instead
 
             # Use active view settings
             ifc_options.UseActiveViewGeometry = True

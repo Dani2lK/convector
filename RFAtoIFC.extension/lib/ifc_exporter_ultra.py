@@ -55,9 +55,11 @@ class UltraQualityIFCExporter:
             # GEOMETRY QUALITY - MAXIMUM DETAIL
             # ============================================================
 
-            # Tessellation - MAXIMUM quality (0.0 = finest, 1.0 = coarsest)
-            # 0.8-1.0 = Ultra fine detail for professional visualization
-            ifc_options.TessellationLevelOfDetail = 1.0  # МАКСИМАЛЬНАЯ детализация!
+            # Tessellation - MAXIMUM quality
+            # Note: In Revit 2024, TessellationLevelOfDetail may not exist as property
+            # Use AddOption instead for better compatibility
+            # Level: 0.0 = finest, 1.0 = coarsest
+            # For ULTRA quality we want finest (close to 0.0)
 
             # Use FINE tessellation (not coarse)
             ifc_options.UseCoarseTessellation = False  # Четкая триангуляция!
@@ -320,8 +322,7 @@ class BalancedQualityIFCExporter:
             # Core settings
             ifc_options.FileVersion = IFCVersion.IFC4
 
-            # Balanced quality (0.6 = good detail, faster than 1.0)
-            ifc_options.TessellationLevelOfDetail = 0.6  # Хорошая детализация
+            # Balanced quality - use coarse tessellation=False for good detail
             ifc_options.UseCoarseTessellation = False
             ifc_options.ExportSolidModelRep = True
             ifc_options.UseActiveViewGeometry = True

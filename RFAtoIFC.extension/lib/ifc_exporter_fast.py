@@ -63,7 +63,8 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                ifc_options.TessellationLevelOfDetail = 0.2  # Very coarse
+                # Tessellation - very coarse for speed
+                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
                 ifc_options.UseActiveViewGeometry = False
                 ifc_options.UseCoarseTessellation = True  # FAST!
                 ifc_options.UseFamilyAndTypeNameForReference = False
@@ -87,7 +88,8 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                ifc_options.TessellationLevelOfDetail = 0.4  # Medium
+                # Tessellation - balanced quality
+                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
                 ifc_options.UseActiveViewGeometry = True
                 ifc_options.UseCoarseTessellation = False
                 ifc_options.UseFamilyAndTypeNameForReference = True
@@ -111,7 +113,8 @@ class FastIFCExporter:
                 ifc_options.IncludeSiteElevation = False
                 ifc_options.SpaceBoundaryLevel = 0
                 ifc_options.SplitWallsAndColumns = False
-                ifc_options.TessellationLevelOfDetail = 0.6  # Fine
+                # Tessellation - fine quality
+                # Note: TessellationLevelOfDetail property doesn't exist in Revit 2024
                 ifc_options.UseActiveViewGeometry = True
                 ifc_options.UseCoarseTessellation = False
                 ifc_options.UseFamilyAndTypeNameForReference = True
