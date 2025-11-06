@@ -9,6 +9,7 @@ import time
 
 clr.AddReference('System.Windows.Forms')
 clr.AddReference('System.Drawing')
+clr.AddReference('RevitAPI')
 
 from System.Windows.Forms import (
     Form, Button, Label, TextBox, FolderBrowserDialog, OpenFileDialog,
@@ -16,6 +17,7 @@ from System.Windows.Forms import (
     MessageBoxButtons, MessageBoxIcon, Application
 )
 from System.Drawing import Point, Size, Font, FontStyle
+from Autodesk.Revit.DB import IFailuresPreprocessor
 
 
 class TemplateConfigDialog(Form):
@@ -317,11 +319,11 @@ class DialogHandler:
             return False
 
 
-class AutoDismissFailureHandler:
+class AutoDismissFailureHandler(IFailuresPreprocessor):
     """Custom failure handler to automatically dismiss warnings."""
 
-    def ProcessFailures(self, failures_accessor):
-        """Process failures and dismiss warnings.
+    def PreprocessFailures(self, failures_accessor):
+        """Preprocess failures and dismiss warnings.
 
         Args:
             failures_accessor: FailuresAccessor instance
