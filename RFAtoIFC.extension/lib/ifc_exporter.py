@@ -44,90 +44,50 @@ class IFCExporter:
 
             # Set IFC version to IFC4
             ifc_options.FileVersion = IFCVersion.IFC4
-
-            # Set IFC export settings for better Blender compatibility
-
-            # Export base quantities (important for materials and geometry)
-            ifc_options.ExportBaseQuantities = True
-
-            # Export bounding box
-            ifc_options.ExportBoundingBox = False  # Not needed for visual models
-
-            # Export IFC common property sets
-            ifc_options.ExportIFCCommonPropertySets = True
-
-            # Export elements in current view only (3D view)
-            ifc_options.FilterViewId = self._get_3d_view_id()
-
-            # Export internal Revit property sets (includes materials info)
-            ifc_options.ExportInternalRevitPropertySets = True
-
-            # Export linked files
-            ifc_options.ExportLinkedFiles = False
-
-            # Export parts as building elements
-            ifc_options.ExportPartsAsBuildingElements = False
-
-            # Export rooms in 3D views
-            ifc_options.ExportRoomsIn3DViews = False
-
-            # Export schedules
-            ifc_options.ExportSchedules = False
-
-            # Export solid models when possible
-            ifc_options.ExportSolidModelRep = True
-
-            # Export surface styles (CRITICAL for materials in Blender!)
-            # This ensures materials and colors are exported
-            ifc_options.ExportSurfaceStyles = True
-
-            # Export user defined property sets
-            ifc_options.ExportUserDefinedPsets = False
-
-            # Include IFCSITE elevation
-            ifc_options.IncludeSiteElevation = False
-
-            # Space boundaries
-            ifc_options.SpaceBoundaryLevel = 0  # No space boundaries
-
-            # Split walls by building stories
-            ifc_options.SplitWallsAndColumns = False
-
-            # Store IFC GUID in file
-            ifc_options.StoreIFCGUID = True
-
-            # Tessellation quality - controlled by View's DetailLevel setting
-            # Note: In Revit 2024, tessellation properties (TessellationLevelOfDetail,
-            # UseCoarseTessellation) don't exist in IFCExportOptions API
-            # Quality is controlled by setting DetailLevel in 3D View before export
-
-            # Use active view settings - CRITICAL for using View's DetailLevel
-            ifc_options.UseActiveViewGeometry = True
-
-            # Use family and type name for references
-            ifc_options.UseFamilyAndTypeNameForReference = True
-
-            # Use type name only for IFC entity
-            ifc_options.UseTypeNameOnlyForIfcType = False
-
-            # Use visible Revit name as entity name
-            ifc_options.UseVisibleRevitNameAsEntityName = True
-
-            # Wall and column splitting
             ifc_options.WallAndColumnSplitting = False
+
+            # Set 3D view for export (sets DetailLevel.Medium)
+            view_id = self._get_3d_view_id()
+            if view_id != ElementId.InvalidElementId:
+                ifc_options.FilterViewId = view_id
+
+            # ALL SETTINGS VIA AddOption() - Compatible with Revit 2024
+            # GEOMETRY & QUALITY
+            ifc_options.AddOption("ExportSolidModelRep", "True")
+            ifc_options.AddOption("UseActiveViewGeometry", "True")
+
+            # MATERIALS - CRITICAL for Blender
+            ifc_options.AddOption("ExportSurfaceStyles", "True")
+            ifc_options.AddOption("ExportBaseQuantities", "True")
+            ifc_options.AddOption("ExportIFCCommonPropertySets", "True")
+            ifc_options.AddOption("ExportInternalRevitPropertySets", "True")
+
+            # STANDARD SETTINGS
+            ifc_options.AddOption("ExportBoundingBox", "False")
+            ifc_options.AddOption("ExportLinkedFiles", "False")
+            ifc_options.AddOption("ExportPartsAsBuildingElements", "False")
+            ifc_options.AddOption("ExportRoomsIn3DViews", "False")
+            ifc_options.AddOption("ExportSchedules", "False")
+            ifc_options.AddOption("ExportUserDefinedPsets", "False")
+            ifc_options.AddOption("IncludeSiteElevation", "False")
+            ifc_options.AddOption("SpaceBoundaryLevel", "0")
+            ifc_options.AddOption("SplitWallsAndColumns", "False")
+
+            # NAMING & REFERENCES
+            ifc_options.AddOption("StoreIFCGUID", "True")
+            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
+            ifc_options.AddOption("UseTypeNameOnlyForIfcType", "False")
+            ifc_options.AddOption("UseVisibleRevitNameAsEntityName", "True")
+
+            # VIEW SETTINGS
+            ifc_options.AddOption("ExportAnnotations", "False")
+            ifc_options.AddOption("ExportRoomsInView", "False")
+            ifc_options.AddOption("VisibleElementsOfCurrentView", "True")
+            ifc_options.AddOption("Use2DRoomBoundaryForVolume", "False")
+            ifc_options.AddOption("Export2DElements", "False")
 
             # Set the file path
             ifc_options.FileName = output_path
-
-            # Add COBie specific settings if needed
-            ifc_options.AddOption("ExportAnnotations", "False")
-            ifc_options.AddOption("ExportRoomsInView", "False")
-
-            # Additional options for better material export
-            ifc_options.AddOption("VisibleElementsOfCurrentView", "True")
-            ifc_options.AddOption("Use2DRoomBoundaryForVolume", "False")
-            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
-            ifc_options.AddOption("Export2DElements", "False")
 
             # Perform the export
             result = self.document.Export(output_folder, file_name + '.ifc', ifc_options)

@@ -50,123 +50,53 @@ class UltraQualityIFCExporter:
             # CORE SETTINGS - IFC4 for best compatibility
             # ============================================================
             ifc_options.FileVersion = IFCVersion.IFC4
-
-            # ============================================================
-            # GEOMETRY QUALITY - MAXIMUM DETAIL
-            # ============================================================
-
-            # Tessellation - MAXIMUM quality
-            # Note: In Revit 2024, tessellation quality is controlled by View DetailLevel
-            # Not through IFCExportOptions properties (those don't exist)
-            # We set DetailLevel.Fine for 3D view before export for best quality
-
-            # Export as solid model representation (best for Blender)
-            ifc_options.ExportSolidModelRep = True  # Твердотельная геометрия
-
-            # Use active view geometry - CRITICAL for using View's DetailLevel setting
-            ifc_options.UseActiveViewGeometry = True
-
-            # ============================================================
-            # MATERIALS & APPEARANCE - CRITICAL FOR BLENDER
-            # ============================================================
-
-            # Export surface styles (colors, materials) - ОБЯЗАТЕЛЬНО для Blender!
-            ifc_options.ExportSurfaceStyles = True  # Материалы и цвета!
-
-            # Export base quantities (includes material information)
-            ifc_options.ExportBaseQuantities = True
-
-            # Export IFC common property sets (material properties)
-            ifc_options.ExportIFCCommonPropertySets = True
-
-            # Export internal Revit property sets (detailed material info)
-            ifc_options.ExportInternalRevitPropertySets = True
-
-            # ============================================================
-            # DETAIL & ACCURACY
-            # ============================================================
-
-            # Don't export bounding box (we need actual geometry)
-            ifc_options.ExportBoundingBox = False
-
-            # Export linked files if needed
-            ifc_options.ExportLinkedFiles = False
-
-            # Don't export parts as building elements (keep original structure)
-            ifc_options.ExportPartsAsBuildingElements = False
-
-            # Don't export rooms in 3D (not needed for families)
-            ifc_options.ExportRoomsIn3DViews = False
-
-            # Don't export schedules (not needed)
-            ifc_options.ExportSchedules = False
-
-            # Export user-defined property sets (custom parameters)
-            ifc_options.ExportUserDefinedPsets = True
-
-            # ============================================================
-            # STRUCTURAL ACCURACY
-            # ============================================================
-
-            # Don't include site elevation (not needed for families)
-            ifc_options.IncludeSiteElevation = False
-
-            # No space boundaries (not needed for families)
-            ifc_options.SpaceBoundaryLevel = 0
-
-            # Don't split walls and columns (keep as single objects)
-            ifc_options.SplitWallsAndColumns = False
-
-            # Don't split by building stories (keep complete)
             ifc_options.WallAndColumnSplitting = False
 
-            # ============================================================
-            # NAMING & REFERENCES
-            # ============================================================
-
-            # Store IFC GUID in file for tracking
-            ifc_options.StoreIFCGUID = True
-
-            # Use family and type name for clear references
-            ifc_options.UseFamilyAndTypeNameForReference = True
-
-            # Use full type information
-            ifc_options.UseTypeNameOnlyForIfcType = False
-
-            # Use visible Revit name as entity name (readable names in Blender)
-            ifc_options.UseVisibleRevitNameAsEntityName = True
+            # Set 3D view for export (also sets DetailLevel.Fine)
+            view_id = self._get_3d_view_id()
+            if view_id != ElementId.InvalidElementId:
+                ifc_options.FilterViewId = view_id
 
             # ============================================================
-            # VIEW SETTINGS
+            # ALL SETTINGS VIA AddOption() - Compatible with Revit 2024
             # ============================================================
 
-            # Set 3D view for export
-            ifc_options.FilterViewId = self._get_3d_view_id()
+            # GEOMETRY QUALITY - use View's DetailLevel (set to Fine in _get_3d_view_id)
+            ifc_options.AddOption("ExportSolidModelRep", "True")  # Твердотельная геометрия
+            ifc_options.AddOption("UseActiveViewGeometry", "True")  # Use View DetailLevel
 
-            # ============================================================
-            # ADDITIONAL OPTIONS FOR BLENDER COMPATIBILITY
-            # ============================================================
-
-            # Don't export annotations (not needed for 3D models)
-            ifc_options.AddOption("ExportAnnotations", "False")
-
-            # Don't export rooms in view
-            ifc_options.AddOption("ExportRoomsInView", "False")
-
-            # Use visible elements of current view
-            ifc_options.AddOption("VisibleElementsOfCurrentView", "True")
-
-            # Don't use 2D room boundary
-            ifc_options.AddOption("Use2DRoomBoundaryForVolume", "False")
-
-            # Use family and type name for reference (clear naming)
-            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
-
-            # Don't export 2D elements
-            ifc_options.AddOption("Export2DElements", "False")
-
-            # Export materials with full detail
+            # MATERIALS & APPEARANCE - CRITICAL FOR BLENDER
+            ifc_options.AddOption("ExportSurfaceStyles", "True")  # Материалы и цвета!
+            ifc_options.AddOption("ExportBaseQuantities", "True")
+            ifc_options.AddOption("ExportIFCCommonPropertySets", "True")
+            ifc_options.AddOption("ExportInternalRevitPropertySets", "True")
             ifc_options.AddOption("ExportMaterialPsets", "True")
+
+            # DETAIL & ACCURACY
+            ifc_options.AddOption("ExportBoundingBox", "False")
+            ifc_options.AddOption("ExportLinkedFiles", "False")
+            ifc_options.AddOption("ExportPartsAsBuildingElements", "False")
+            ifc_options.AddOption("ExportRoomsIn3DViews", "False")
+            ifc_options.AddOption("ExportSchedules", "False")
+            ifc_options.AddOption("ExportUserDefinedPsets", "True")
+
+            # STRUCTURAL ACCURACY
+            ifc_options.AddOption("IncludeSiteElevation", "False")
+            ifc_options.AddOption("SpaceBoundaryLevel", "0")
+            ifc_options.AddOption("SplitWallsAndColumns", "False")
+
+            # NAMING & REFERENCES
+            ifc_options.AddOption("StoreIFCGUID", "True")
+            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
+            ifc_options.AddOption("UseTypeNameOnlyForIfcType", "False")
+            ifc_options.AddOption("UseVisibleRevitNameAsEntityName", "True")
+
+            # VIEW SETTINGS
+            ifc_options.AddOption("ExportAnnotations", "False")
+            ifc_options.AddOption("ExportRoomsInView", "False")
+            ifc_options.AddOption("VisibleElementsOfCurrentView", "True")
+            ifc_options.AddOption("Use2DRoomBoundaryForVolume", "False")
+            ifc_options.AddOption("Export2DElements", "False")
 
             # Set the file path
             ifc_options.FileName = output_path
@@ -317,41 +247,43 @@ class BalancedQualityIFCExporter:
 
             # Core settings
             ifc_options.FileVersion = IFCVersion.IFC4
+            ifc_options.WallAndColumnSplitting = False
 
-            # Balanced quality - quality controlled by View's DetailLevel
-            ifc_options.ExportSolidModelRep = True
-            ifc_options.UseActiveViewGeometry = True
+            # Set 3D view for export (uses Medium DetailLevel)
+            view_id = self.ultra_exporter._get_3d_view_id()
+            if view_id != ElementId.InvalidElementId:
+                ifc_options.FilterViewId = view_id
+
+            # Balanced quality - ALL settings via AddOption()
+            ifc_options.AddOption("ExportSolidModelRep", "True")
+            ifc_options.AddOption("UseActiveViewGeometry", "True")
 
             # Materials - full export
-            ifc_options.ExportSurfaceStyles = True
-            ifc_options.ExportBaseQuantities = True
-            ifc_options.ExportIFCCommonPropertySets = True
-            ifc_options.ExportInternalRevitPropertySets = False  # Skip for speed
+            ifc_options.AddOption("ExportSurfaceStyles", "True")
+            ifc_options.AddOption("ExportBaseQuantities", "True")
+            ifc_options.AddOption("ExportIFCCommonPropertySets", "True")
+            ifc_options.AddOption("ExportInternalRevitPropertySets", "False")  # Skip for speed
 
             # Standard settings
-            ifc_options.ExportBoundingBox = False
-            ifc_options.ExportLinkedFiles = False
-            ifc_options.ExportPartsAsBuildingElements = False
-            ifc_options.ExportRoomsIn3DViews = False
-            ifc_options.ExportSchedules = False
-            ifc_options.ExportUserDefinedPsets = False
-            ifc_options.IncludeSiteElevation = False
-            ifc_options.SpaceBoundaryLevel = 0
-            ifc_options.SplitWallsAndColumns = False
-            ifc_options.WallAndColumnSplitting = False
-            ifc_options.StoreIFCGUID = True
-            ifc_options.UseFamilyAndTypeNameForReference = True
-            ifc_options.UseTypeNameOnlyForIfcType = False
-            ifc_options.UseVisibleRevitNameAsEntityName = True
+            ifc_options.AddOption("ExportBoundingBox", "False")
+            ifc_options.AddOption("ExportLinkedFiles", "False")
+            ifc_options.AddOption("ExportPartsAsBuildingElements", "False")
+            ifc_options.AddOption("ExportRoomsIn3DViews", "False")
+            ifc_options.AddOption("ExportSchedules", "False")
+            ifc_options.AddOption("ExportUserDefinedPsets", "False")
+            ifc_options.AddOption("IncludeSiteElevation", "False")
+            ifc_options.AddOption("SpaceBoundaryLevel", "0")
+            ifc_options.AddOption("SplitWallsAndColumns", "False")
+            ifc_options.AddOption("StoreIFCGUID", "True")
+            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
+            ifc_options.AddOption("UseTypeNameOnlyForIfcType", "False")
+            ifc_options.AddOption("UseVisibleRevitNameAsEntityName", "True")
 
-            ifc_options.FilterViewId = self.ultra_exporter._get_3d_view_id()
-
-            # Additional options
+            # View settings
             ifc_options.AddOption("ExportAnnotations", "False")
             ifc_options.AddOption("ExportRoomsInView", "False")
             ifc_options.AddOption("VisibleElementsOfCurrentView", "True")
             ifc_options.AddOption("Use2DRoomBoundaryForVolume", "False")
-            ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
             ifc_options.AddOption("Export2DElements", "False")
 
             ifc_options.FileName = output_path

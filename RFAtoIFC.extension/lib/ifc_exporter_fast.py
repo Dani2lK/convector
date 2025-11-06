@@ -43,83 +43,60 @@ class FastIFCExporter:
 
             # Basic settings
             ifc_options.FileVersion = IFCVersion.IFC4
-            ifc_options.FilterViewId = self._get_3d_view_id(quality)
-            ifc_options.StoreIFCGUID = True
+            ifc_options.WallAndColumnSplitting = False
 
+            # Set 3D view with appropriate DetailLevel
+            view_id = self._get_3d_view_id(quality)
+            if view_id != ElementId.InvalidElementId:
+                ifc_options.FilterViewId = view_id
+
+            # ALL SETTINGS VIA AddOption() - Compatible with Revit 2024
             # Quality-based settings
             if quality == 'fast':
-                # FASTEST - minimal export
-                ifc_options.ExportBaseQuantities = False
-                ifc_options.ExportBoundingBox = False
-                ifc_options.ExportIFCCommonPropertySets = False
-                ifc_options.ExportInternalRevitPropertySets = False
-                ifc_options.ExportLinkedFiles = False
-                ifc_options.ExportPartsAsBuildingElements = False
-                ifc_options.ExportRoomsIn3DViews = False
-                ifc_options.ExportSchedules = False
-                ifc_options.ExportSolidModelRep = True
-                ifc_options.ExportSurfaceStyles = True  # Keep for Blender
-                ifc_options.ExportUserDefinedPsets = False
-                ifc_options.IncludeSiteElevation = False
-                ifc_options.SpaceBoundaryLevel = 0
-                ifc_options.SplitWallsAndColumns = False
-                # Tessellation quality controlled by View's DetailLevel (set to Coarse for speed)
-                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
-                ifc_options.UseActiveViewGeometry = False
-                ifc_options.UseFamilyAndTypeNameForReference = False
-                ifc_options.UseTypeNameOnlyForIfcType = True
-                ifc_options.UseVisibleRevitNameAsEntityName = True
-                ifc_options.WallAndColumnSplitting = False
+                # FASTEST - minimal export, uses Coarse DetailLevel from view
+                ifc_options.AddOption("ExportSolidModelRep", "True")
+                ifc_options.AddOption("ExportSurfaceStyles", "True")  # Keep for Blender
+                ifc_options.AddOption("ExportBaseQuantities", "False")
+                ifc_options.AddOption("ExportIFCCommonPropertySets", "False")
+                ifc_options.AddOption("ExportInternalRevitPropertySets", "False")
+                ifc_options.AddOption("UseActiveViewGeometry", "False")
+                ifc_options.AddOption("UseFamilyAndTypeNameForReference", "False")
+                ifc_options.AddOption("UseTypeNameOnlyForIfcType", "True")
 
             elif quality == 'medium':
-                # BALANCED - good speed with materials
-                ifc_options.ExportBaseQuantities = True
-                ifc_options.ExportBoundingBox = False
-                ifc_options.ExportIFCCommonPropertySets = False
-                ifc_options.ExportInternalRevitPropertySets = False
-                ifc_options.ExportLinkedFiles = False
-                ifc_options.ExportPartsAsBuildingElements = False
-                ifc_options.ExportRoomsIn3DViews = False
-                ifc_options.ExportSchedules = False
-                ifc_options.ExportSolidModelRep = True
-                ifc_options.ExportSurfaceStyles = True
-                ifc_options.ExportUserDefinedPsets = False
-                ifc_options.IncludeSiteElevation = False
-                ifc_options.SpaceBoundaryLevel = 0
-                ifc_options.SplitWallsAndColumns = False
-                # Tessellation quality controlled by View's DetailLevel (set to Medium)
-                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
-                ifc_options.UseActiveViewGeometry = True
-                ifc_options.UseFamilyAndTypeNameForReference = True
-                ifc_options.UseTypeNameOnlyForIfcType = False
-                ifc_options.UseVisibleRevitNameAsEntityName = True
-                ifc_options.WallAndColumnSplitting = False
+                # BALANCED - good speed with materials, uses Medium DetailLevel
+                ifc_options.AddOption("ExportSolidModelRep", "True")
+                ifc_options.AddOption("ExportSurfaceStyles", "True")
+                ifc_options.AddOption("ExportBaseQuantities", "True")
+                ifc_options.AddOption("ExportIFCCommonPropertySets", "False")
+                ifc_options.AddOption("ExportInternalRevitPropertySets", "False")
+                ifc_options.AddOption("UseActiveViewGeometry", "True")
+                ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
+                ifc_options.AddOption("UseTypeNameOnlyForIfcType", "False")
 
             else:  # 'high'
-                # QUALITY - best output (slower)
-                ifc_options.ExportBaseQuantities = True
-                ifc_options.ExportBoundingBox = False
-                ifc_options.ExportIFCCommonPropertySets = True
-                ifc_options.ExportInternalRevitPropertySets = True
-                ifc_options.ExportLinkedFiles = False
-                ifc_options.ExportPartsAsBuildingElements = False
-                ifc_options.ExportRoomsIn3DViews = False
-                ifc_options.ExportSchedules = False
-                ifc_options.ExportSolidModelRep = True
-                ifc_options.ExportSurfaceStyles = True
-                ifc_options.ExportUserDefinedPsets = False
-                ifc_options.IncludeSiteElevation = False
-                ifc_options.SpaceBoundaryLevel = 0
-                ifc_options.SplitWallsAndColumns = False
-                # Tessellation quality controlled by View's DetailLevel (set to Fine)
-                # Note: Tessellation properties don't exist in Revit 2024 IFCExportOptions
-                ifc_options.UseActiveViewGeometry = True
-                ifc_options.UseFamilyAndTypeNameForReference = True
-                ifc_options.UseTypeNameOnlyForIfcType = False
-                ifc_options.UseVisibleRevitNameAsEntityName = True
-                ifc_options.WallAndColumnSplitting = False
+                # QUALITY - best output, uses Fine DetailLevel
+                ifc_options.AddOption("ExportSolidModelRep", "True")
+                ifc_options.AddOption("ExportSurfaceStyles", "True")
+                ifc_options.AddOption("ExportBaseQuantities", "True")
+                ifc_options.AddOption("ExportIFCCommonPropertySets", "True")
+                ifc_options.AddOption("ExportInternalRevitPropertySets", "True")
+                ifc_options.AddOption("UseActiveViewGeometry", "True")
+                ifc_options.AddOption("UseFamilyAndTypeNameForReference", "True")
+                ifc_options.AddOption("UseTypeNameOnlyForIfcType", "False")
 
-            # Additional speed optimizations
+            # Common settings for all quality modes
+            ifc_options.AddOption("ExportBoundingBox", "False")
+            ifc_options.AddOption("ExportLinkedFiles", "False")
+            ifc_options.AddOption("ExportPartsAsBuildingElements", "False")
+            ifc_options.AddOption("ExportRoomsIn3DViews", "False")
+            ifc_options.AddOption("ExportSchedules", "False")
+            ifc_options.AddOption("ExportUserDefinedPsets", "False")
+            ifc_options.AddOption("IncludeSiteElevation", "False")
+            ifc_options.AddOption("SpaceBoundaryLevel", "0")
+            ifc_options.AddOption("SplitWallsAndColumns", "False")
+            ifc_options.AddOption("StoreIFCGUID", "True")
+            ifc_options.AddOption("UseVisibleRevitNameAsEntityName", "True")
             ifc_options.AddOption("ExportAnnotations", "False")
             ifc_options.AddOption("ExportRoomsInView", "False")
             ifc_options.AddOption("Export2DElements", "False")
