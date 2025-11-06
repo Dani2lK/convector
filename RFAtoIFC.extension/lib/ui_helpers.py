@@ -33,7 +33,7 @@ class TemplateConfigDialog(Form):
         # Form settings
         self.Text = 'Настройка шаблонов проектов'
         self.Width = 650
-        self.Height = 400
+        self.Height = 500  # Увеличено с 400 до 500
         self.FormBorderStyle = FormBorderStyle.FixedDialog
         self.StartPosition = FormStartPosition.CenterScreen
         self.MaximizeBox = False

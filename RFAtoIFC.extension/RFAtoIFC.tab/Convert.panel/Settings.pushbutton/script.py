@@ -13,7 +13,7 @@ if lib_path not in sys.path:
 from config_manager import ConfigManager
 from ui_helpers import TemplateConfigDialog
 
-from System.Windows.Forms import Application
+from System.Windows.Forms import Application, DialogResult
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
         Application.Run(dialog)
 
         # Check if configuration was saved
-        if dialog.result == System.Windows.Forms.DialogResult.OK:
+        if dialog.result == DialogResult.OK:
             print("Настройки шаблонов успешно сохранены!")
         else:
             print("Настройка отменена.")

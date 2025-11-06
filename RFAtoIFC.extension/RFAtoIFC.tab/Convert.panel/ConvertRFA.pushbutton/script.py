@@ -13,7 +13,9 @@ clr.AddReference('System.Windows.Forms')
 
 from Autodesk.Revit.DB import *
 from Autodesk.Revit.UI import *
-from System.Windows.Forms import MessageBox, MessageBoxButtons, MessageBoxIcon
+from System.Windows.Forms import (
+    MessageBox, MessageBoxButtons, MessageBoxIcon, DialogResult, Application
+)
 
 # Add lib folder to path
 script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -70,12 +72,11 @@ class RFAtoIFCConverter:
                     MessageBoxIcon.Question
                 )
 
-                if result == System.Windows.Forms.DialogResult.Yes:
-                    from System.Windows.Forms import Application
+                if result == DialogResult.Yes:
                     dialog = TemplateConfigDialog(self.config_manager)
                     Application.Run(dialog)
 
-                    if dialog.result != System.Windows.Forms.DialogResult.OK:
+                    if dialog.result != DialogResult.OK:
                         print("Настройка отменена. Выход.")
                         return
                 else:

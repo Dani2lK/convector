@@ -13,7 +13,9 @@ clr.AddReference('System.Windows.Forms')
 
 from Autodesk.Revit.DB import *
 from Autodesk.Revit.UI import *
-from System.Windows.Forms import MessageBox, MessageBoxButtons, MessageBoxIcon
+from System.Windows.Forms import (
+    MessageBox, MessageBoxButtons, MessageBoxIcon, DialogResult, Application
+)
 
 # Add lib folder to path
 script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,7 +25,7 @@ if lib_path not in sys.path:
 
 from config_manager import ConfigManager
 from family_analyzer import FamilyAnalyzer
-from ifc_exporter import IFCExporter
+from ifc_exporter_ultra import UltraQualityIFCExporter
 from ui_helpers import (
     FileSelectionHelper, TemplateConfigDialog,
     RevitActivitySimulator, AutoDismissFailureHandler
@@ -81,12 +83,11 @@ class FastRFAtoIFCConverter:
                     MessageBoxIcon.Question
                 )
 
-                if result == System.Windows.Forms.DialogResult.Yes:
-                    from System.Windows.Forms import Application
+                if result == DialogResult.Yes:
                     dialog = TemplateConfigDialog(self.config_manager)
                     Application.Run(dialog)
 
-                    if dialog.result != System.Windows.Forms.DialogResult.OK:
+                    if dialog.result != DialogResult.OK:
                         print("Настройка отменена. Выход.")
                         return
                 else:
@@ -134,7 +135,7 @@ class FastRFAtoIFCConverter:
             self.config_manager.set_last_export_folder(export_folder)
 
             # Create IFC4 subfolder
-            ifc4_folder = os.path.join(export_folder, IFCExporter.get_ifc4_folder_name())
+            ifc4_folder = os.path.join(export_folder, UltraQualityIFCExporter.get_ifc4_folder_name())
             if not os.path.exists(ifc4_folder):
                 os.makedirs(ifc4_folder)
 
@@ -150,11 +151,11 @@ class FastRFAtoIFCConverter:
                 MessageBoxIcon.Question
             )
 
-            if result == System.Windows.Forms.DialogResult.Cancel:
+            if result == DialogResult.Cancel:
                 print("Отменено пользователем.")
                 return
 
-            self.cache_enabled = (result == System.Windows.Forms.DialogResult.Yes)
+            self.cache_enabled = (result == DialogResult.Yes)
 
             if self.cache_enabled:
                 print("\n✓ Режим: БЫСТРЫЙ (с кэшированием шаблонов)")
@@ -363,12 +364,12 @@ class FastRFAtoIFCConverter:
             self._place_family_simple(project_doc, loaded_family)
             self.performance_stats['place_instance'] += time.time() - step_start
 
-            # 6. Export to IFC4
+            # 6. Export to IFC4 with ULTRA quality
             step_start = time.time()
-            print("  Экспорт IFC4...")
-            exporter = IFCExporter(project_doc)
+            print("  Экспорт IFC4 (максимальное качество)...")
+            exporter = UltraQualityIFCExporter(project_doc)
             file_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
-            success, output_path, error = exporter.export_to_ifc4(output_folder, file_name)
+            success, output_path, error = exporter.export_to_ifc4_ultra(output_folder, file_name)
 
             self.performance_stats['export_ifc'] += time.time() - step_start
 
