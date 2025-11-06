@@ -220,49 +220,38 @@ class RFAtoIFCConverter:
             if not project_doc:
                 raise Exception("Не удалось открыть шаблон проекта")
 
-            # Load family into project with transaction
+            # Load family into project (WITHOUT transaction - LoadFamily creates its own)
             print("  Загрузка семейства в проект...")
             loaded_family = None
 
-            with Transaction(project_doc, "Load Family") as t:
-                # Set failure handler
-                options = t.GetFailureHandlingOptions()
-                options.SetFailuresPreprocessor(self.failure_handler)
-                t.SetFailureHandlingOptions(options)
+            try:
+                # Load family - this method creates its own transaction internally
+                success = family_doc.LoadFamily(project_doc, TransactionFamilyLoadOptions())
 
-                t.Start()
+                if not success:
+                    print("  Предупреждение: LoadFamily вернул False, но продолжаем...")
 
-                try:
-                    # Load family
-                    success = family_doc.LoadFamily(project_doc, TransactionFamilyLoadOptions())
+            except Exception as e:
+                raise Exception("Ошибка загрузки семейства: {}".format(str(e)))
 
-                    if not success:
-                        print("  Предупреждение: LoadFamily вернул False, но продолжаем...")
+            # Find loaded family (no transaction needed for reading)
+            family_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
 
-                    # Find loaded family
-                    collector = FilteredElementCollector(project_doc)
-                    families = collector.OfClass(Family).ToElements()
+            collector = FilteredElementCollector(project_doc)
+            families = collector.OfClass(Family).ToElements()
 
-                    family_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
-
-                    for fam in families:
-                        if fam.Name == family_name:
-                            loaded_family = fam
-                            break
-
-                    t.Commit()
-
-                except Exception as e:
-                    t.RollBack()
-                    raise Exception("Ошибка загрузки семейства: {}".format(str(e)))
+            for fam in families:
+                if fam.Name == family_name:
+                    loaded_family = fam
+                    break
 
             if not loaded_family:
                 # Try to find by partial name match
-                collector = FilteredElementCollector(project_doc)
-                families = collector.OfClass(Family).ToElements()
-                if len(families) > 0:
-                    loaded_family = families[0]  # Take first family
-                    print("  Найдено семейство: {}".format(loaded_family.Name))
+                for fam in families:
+                    if family_name in fam.Name:
+                        loaded_family = fam
+                        print("  Найдено семейство: {}".format(loaded_family.Name))
+                        break
 
             # Place family instance on 3D view
             print("  Размещение семейства в проекте...")

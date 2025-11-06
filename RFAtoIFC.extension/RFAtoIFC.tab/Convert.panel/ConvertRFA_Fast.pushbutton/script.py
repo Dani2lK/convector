@@ -324,37 +324,29 @@ class FastRFAtoIFCConverter:
 
             self.performance_stats['load_template'] += time.time() - step_start
 
-            # 4. Load family into project - OPTIMIZED
+            # 4. Load family into project - OPTIMIZED (no transaction needed)
             step_start = time.time()
             print("  Загрузка в проект...")
             loaded_family = None
 
-            # ОПТИМИЗАЦИЯ: Минимальная транзакция
-            with Transaction(project_doc, "Load") as t:
-                options = t.GetFailureHandlingOptions()
-                options.SetFailuresPreprocessor(self.failure_handler)
-                t.SetFailureHandlingOptions(options)
+            try:
+                # Load family - creates its own transaction internally
+                family_doc.LoadFamily(project_doc, TransactionFamilyLoadOptions())
 
-                t.Start()
-                try:
-                    family_doc.LoadFamily(project_doc, TransactionFamilyLoadOptions())
+                # Quick find family (no transaction needed for reading)
+                family_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
+                collector = FilteredElementCollector(project_doc).OfClass(Family)
 
-                    # Quick find family
-                    family_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
-                    collector = FilteredElementCollector(project_doc).OfClass(Family)
+                for fam in collector:
+                    if fam.Name == family_name:
+                        loaded_family = fam
+                        break
 
-                    for fam in collector:
-                        if fam.Name == family_name:
-                            loaded_family = fam
-                            break
+                if not loaded_family and collector.GetElementCount() > 0:
+                    loaded_family = collector.FirstElement()
 
-                    if not loaded_family and collector.GetElementCount() > 0:
-                        loaded_family = collector.FirstElement()
-
-                    t.Commit()
-                except Exception as e:
-                    t.RollBack()
-                    raise Exception("Ошибка загрузки: {}".format(str(e)))
+            except Exception as e:
+                raise Exception("Ошибка загрузки: {}".format(str(e)))
 
             self.performance_stats['load_family'] += time.time() - step_start
 
