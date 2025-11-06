@@ -36,33 +36,32 @@ class FamilyAnalyzer:
         # Check built-in category
         category_id = family_category.Id.IntegerValue
 
-        # Wall-hosted categories
+        # Wall-hosted categories (convert to int for comparison)
         wall_hosted = [
-            BuiltInCategory.OST_Windows,
-            BuiltInCategory.OST_Doors,
-            BuiltInCategory.OST_GenericModel,  # May be wall-hosted
-            BuiltInCategory.OST_Lighting,       # May be wall-hosted
-            BuiltInCategory.OST_ElectricalFixtures,
-            BuiltInCategory.OST_LightingFixtures,
+            int(BuiltInCategory.OST_Windows),
+            int(BuiltInCategory.OST_Doors),
+            int(BuiltInCategory.OST_GenericModel),
+            int(BuiltInCategory.OST_ElectricalFixtures),
+            int(BuiltInCategory.OST_LightingFixtures),
         ]
 
         # Floor-hosted categories
         floor_hosted = [
-            BuiltInCategory.OST_Columns,
-            BuiltInCategory.OST_StructuralColumns,
-            BuiltInCategory.OST_Furniture,
-            BuiltInCategory.OST_PlumbingFixtures,
+            int(BuiltInCategory.OST_Columns),
+            int(BuiltInCategory.OST_StructuralColumns),
+            int(BuiltInCategory.OST_Furniture),
+            int(BuiltInCategory.OST_PlumbingFixtures),
         ]
 
         # Ceiling-hosted categories
         ceiling_hosted = [
-            BuiltInCategory.OST_LightingFixtures,  # Often ceiling-hosted
-            BuiltInCategory.OST_ElectricalFixtures,
+            int(BuiltInCategory.OST_LightingFixtures),
+            int(BuiltInCategory.OST_ElectricalFixtures),
         ]
 
         # Roof-hosted categories
         roof_hosted = [
-            BuiltInCategory.OST_GenericModel,
+            int(BuiltInCategory.OST_GenericModel),
         ]
 
         # Try to determine from family parameters
@@ -88,22 +87,22 @@ class FamilyAnalyzer:
 
                         if placement_type == FamilyPlacementType.OneLevelBased:
                             # Check category for more specific determination
-                            if category_id in [int(cat) for cat in wall_hosted]:
+                            if category_id in wall_hosted:
                                 return 'wall'
-                            elif category_id in [int(cat) for cat in floor_hosted]:
+                            elif category_id in floor_hosted:
                                 return 'floor'
-                            elif category_id in [int(cat) for cat in ceiling_hosted]:
+                            elif category_id in ceiling_hosted:
                                 return 'ceiling'
                             else:
                                 return 'floor'  # Default for level-based
 
                         elif placement_type == FamilyPlacementType.OneLevelBasedHosted:
                             # Definitely needs a host
-                            if category_id in [int(cat) for cat in wall_hosted]:
+                            if category_id in wall_hosted:
                                 return 'wall'
-                            elif category_id in [int(cat) for cat in floor_hosted]:
+                            elif category_id in floor_hosted:
                                 return 'floor'
-                            elif category_id in [int(cat) for cat in ceiling_hosted]:
+                            elif category_id in ceiling_hosted:
                                 return 'ceiling'
                             else:
                                 return 'wall'  # Default for hosted
@@ -113,9 +112,9 @@ class FamilyAnalyzer:
 
                         elif placement_type == FamilyPlacementType.WorkPlaneBased:
                             # Face-based families
-                            if category_id in [int(cat) for cat in wall_hosted]:
+                            if category_id in wall_hosted:
                                 return 'wall'
-                            elif category_id in [int(cat) for cat in ceiling_hosted]:
+                            elif category_id in ceiling_hosted:
                                 return 'ceiling'
                             else:
                                 return 'wall'  # Default for face-based
